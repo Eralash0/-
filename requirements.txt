@@ -3,3 +3,6 @@ uvicorn[standard]
 jinja2
 python-multipart
 sqlalchemy
+itsdangerous
+passlib[bcrypt]
+bcrypt==4.0.1
