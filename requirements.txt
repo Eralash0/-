@@ -7,3 +7,4 @@ itsdangerous
 passlib[bcrypt]
 bcrypt==4.0.1
 werkzeug
+pydantic[email]
