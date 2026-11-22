@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="card profile-head">
+    <div class="avatar">{{ user.full_name[:1]|upper }}</div>
+    <div>
+        <h2>{{ user.full_name }}</h2>
+        <p class="muted">{{ user.email }}</p>
+        <span class="role-tag {{ user.role }}">
+            {% if user.role == 'admin' %}Администратор{% else %}Студент{% endif %}
+        </span>
+    </div>
+</div>
+
+
+
+<!-- ============ ПРОФИЛЬ ============ -->
+<div class="tab-panel {% if tab == 'profile' %}active{% endif %}" id="panel-profile">
+
+    <div class="card info-card">
+        <h3>Жалпы ақпарат</h3>
+        <table class="info-table">
+            <tr><td>Аты-жөні</td><td>{{ user.full_name }}</td></tr>
+            <tr><td>Email</td><td>{{ user.email }}</td></tr>
+            <tr><td>Рөлі</td><td>{% if user.role == 'admin' %}Администратор{% else %}Студент{% endif %}</td></tr>
+            <tr><td>Тіркелген күні</td><td>{{ user.created_at[:10] }}</td></tr>
+        </table>
+    </div>
+
+    {% if admin_stats %}
+    <h3 class="section-title">Жүйе статистикасы</h3>
+    <div class="stats">
+        <div class="card stat"><span>{{ admin_stats.students }}</span>Студент</div>
+        <div class="card stat"><span>{{ admin_stats.tests }}</span>Тест</div>
+        <div class="card stat"><span>{{ admin_stats.results }}</span>Тапсырылған тест</div>
+    </div>
+    <a class="btn" href="{{ url_for('admin') }}">Админ-панельге өту</a>
+    {% endif %}
+
+    <h3 class="section-title">Менің нәтижелерім</h3>
+    <div class="stats">
+        <div class="card stat"><span>{{ my.cnt }}</span>Тапсырылған тест</div>
+        <div class="card stat"><span>{{ my.avg if my.avg is not none else 0 }}%</span>Орташа нәтиже</div>
+        <div class="card stat"><span>{{ my.best if my.best is not none else 0 }}%</span>Ең жақсы нәтиже</div>
+    </div>
+
+    {% if recent %}
+    <div class="card table-card">
+        <table>
+            <tr><th>Тест</th><th>Балл</th><th>Пайыз</th><th>Күні</th><th></th></tr>
+            {% for r in recent %}
+            <tr>
+                <td>{{ r.title }}</td>
+                <td>{{ r.score }} / {{ r.max_score }}</td>
+                <td>{{ r.percent }}%</td>
+                <td>{{ r.taken_at }}</td>
+                <td><a href="{{ url_for('result', result_id=r.id) }}">Ашу</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <p class="hint"><a href="{{ url_for('tests') }}">Барлық нәтижелерді көру</a></p>
+    {% else %}
+    <p>Әзірге тест тапсырған жоқсыз. <a href="{{ url_for('tests') }}">Тесттерге өту</a></p>
+    {% endif %}
+</div>
+
+<!-- ============ БАПТАУЛАР ============ -->
+<div class="tab-panel {% if tab == 'settings' %}active{% endif %}" id="panel-settings">
+
+    <div class="card set-card">
+        <h3>Аты-жөнін өзгерту</h3>
+        <form method="POST" action="{{ url_for('profile_name') }}">
+            <label>Жаңа аты-жөні</label>
+            <input type="text" name="full_name" value="{{ user.full_name }}" required>
+            <button class="btn" type="submit">Сақтау</button>
+        </form>
+    </div>
+
+    <div class="card set-card">
+        <h3>Құпиясөзді өзгерту</h3>
+        <form method="POST" action="{{ url_for('profile_password') }}">
+            <label>Ескі құпиясөз</label>
+            <input type="password" name="old_password" required>
+            <label>Жаңа құпиясөз</label>
+            <input type="password" name="new_password" required>
+            <label>Жаңа құпиясөзді қайталаңыз</label>
+            <input type="password" name="confirm" required>
+            <button class="btn" type="submit">Құпиясөзді өзгерту</button>
+        </form>
+    </div>
+
+    <div class="card set-card">
+        <h3>Email өзгерту</h3>
+        <form method="POST" action="{{ url_for('profile_email') }}">
+            <label>Жаңа email</label>
+            <input type="email" name="email" value="{{ user.email }}" required>
+            <label>Растау үшін құпиясөз</label>
+            <input type="password" name="password" required>
+            <button class="btn" type="submit">Email өзгерту</button>
+        </form>
+    </div>
+
+    <div class="card set-card">
+        <h3>Сайт тақырыбы</h3>
+        <p class="muted">Таңдау осы браузерде сақталады.</p>
+        <div class="theme-btns">
+            <button type="button" class="btn theme-btn" data-theme="light">☀ Ашық</button>
+            <button type="button" class="btn theme-btn" data-theme="dark">🌙 Қараңғы</button>
+        </div>
+    </div>
+    {% include "_help.html" %}
+    {% if user.role != 'admin' %}
+    <div class="card set-card danger-zone">
+        <h3>Аккаунтты өшіру</h3>
+        <p class="muted">Аккаунтыңыз және барлық нәтижелеріңіз біржола өшеді. Бұл әрекетті қайтару мүмкін емес.</p>
+        <form method="POST" action="{{ url_for('profile_delete') }}"
+              onsubmit="return confirm('Аккаунтты біржола өшіресіз бе?')">
+            <label>Растау үшін құпиясөз</label>
+            <input type="password" name="password" required>
+            <button class="btn-danger big" type="submit">Аккаунтты өшіру</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Вкладкалар
+    document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var tab = btn.dataset.tab;
+            document.querySelectorAll(".tab-btn").forEach(function (b) {
+                b.classList.toggle("active", b === btn);
+            });
+            document.querySelectorAll(".tab-panel").forEach(function (p) {
+                p.classList.toggle("active", p.id === "panel-" + tab);
+            });
+            history.replaceState(null, "", "?tab=" + tab);
+        });
+    });
+
+    // Тақырып
+    function currentTheme() {
+        return document.documentElement.classList.contains("dark") ? "dark" : "light";
+    }
+    function markTheme() {
+        document.querySelectorAll(".theme-btn").forEach(function (b) {
+            b.classList.toggle("selected", b.dataset.theme === currentTheme());
+        });
+    }
+    document.querySelectorAll(".theme-btn").forEach(function (b) {
+        b.addEventListener("click", function () {
+            var t = b.dataset.theme;
+            document.documentElement.classList.toggle("dark", t === "dark");
+            try { localStorage.setItem("theme", t); } catch (e) {}
+            markTheme();
+        });
+    });
+    markTheme();
+</script>
+{% endblock %}

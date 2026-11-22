@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Админ-панель{% endblock %}
+
+{% block content %}
+<h2>Админ-панель</h2>
+
+<div class="stats">
+    <div class="card stat"><span>{{ stats.students }}</span>Студент</div>
+    <div class="card stat"><span>{{ stats.tests }}</span>Тест</div>
+    <div class="card stat"><span>{{ stats.results }}</span>Тапсырылған тест</div>
+    <div class="card stat"><span>{{ stats.avg }}%</span>Орташа нәтиже</div>
+</div>
+
+<h3 class="section-title">1. Жаңа тест қосу</h3>
+<div class="card">
+    <form method="POST" action="{{ url_for('admin_add_test') }}">
+        <label>Тест атауы</label>
+        <input type="text" name="title" required>
+        <label>Сипаттамасы</label>
+        <input type="text" name="description">
+        <div class="row">
+            <div>
+                <label>Максималды балл</label>
+                <input type="number" name="max_score" value="100" min="1" required>
+            </div>
+            <div>
+                <label>Уақыты (минут)</label>
+                <input type="number" name="duration" value="15" min="1" required>
+            </div>
+        </div>
+        <button class="btn" type="submit">Тест қосу</button>
+    </form>
+</div>
+
+<h3 class="section-title">2. Тесттер және сұрақтар</h3>
+{% if tests %}
+<div class="filter-bar" data-target="testsList">
+    <input type="text" class="f-search" placeholder="Тест атауы немесе сұрақ мәтіні бойынша іздеу...">
+    <button type="button" class="f-reset">Тазалау</button>
+    <span class="f-count"></span>
+</div>
+{% endif %}
+
+<div id="testsList">
+{% for t in tests %}
+<div class="card admin-test" data-row>
+    <div class="admin-test-head">
+        <div>
+            <b>{{ t.title }}</b>
+            <span class="muted">· {{ t.q_count }} сұрақ · {{ t.max_score }} балл · {{ t.duration_minutes }} мин</span>
+        </div>
+        <form method="POST" action="{{ url_for('admin_delete_test', test_id=t.id) }}"
+              onsubmit="return confirm('Тестті және оның барлық нәтижесін өшіресіз бе?')">
+            <button class="btn-danger" type="submit">Тестті өшіру</button>
+        </form>
+    </div>
+
+    <details>
+        <summary>Сұрақтарды көру</summary>
+        {% for q in questions_by_test.get(t.id, []) %}
+        <div class="q-row">
+            <div>
+                <b>{{ loop.index }}. {{ q.question_text }}</b><br>
+                <span class="muted">
+                    A) {{ q.option_a }} · B) {{ q.option_b }} ·
+                    C) {{ q.option_c }} · D) {{ q.option_d }}
+                </span><br>
+                <span class="correct">Дұрыс жауап: {{ q.correct_option }}</span>
+            </div>
+            <form method="POST" action="{{ url_for('admin_delete_question', question_id=q.id) }}"
+                  onsubmit="return confirm('Сұрақты өшіресіз бе?')">
+                <button class="btn-danger" type="submit">Өшіру</button>
+            </form>
+        </div>
+        {% else %}
+        <p class="muted">Бұл тестте әзірге сұрақ жоқ.</p>
+        {% endfor %}
+    </details>
+</div>
+{% else %}
+<p>Тесттер жоқ.</p>
+{% endfor %}
+</div>
+
+<h3 class="section-title">3. Тестке сұрақ қосу</h3>
+<div class="card">
+    {% if tests %}
+    <form method="POST" action="{{ url_for('admin_add_question') }}">
+        <label>Тест</label>
+        <select name="test_id" required>
+            {% for t in tests %}
+            <option value="{{ t.id }}">{{ t.title }}</option>
+            {% endfor %}
+        </select>
+        <label>Сұрақ мәтіні</label>
+        <input type="text" name="question_text" required>
+        <label>A нұсқасы</label>
+        <input type="text" name="option_a" required>
+        <label>B нұсқасы</label>
+        <input type="text" name="option_b" required>
+        <label>C нұсқасы</label>
+        <input type="text" name="option_c" required>
+        <label>D нұсқасы</label>
+        <input type="text" name="option_d" required>
+        <label>Дұрыс жауап</label>
+        <select name="correct_option" required>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+        </select>
+        <button class="btn" type="submit">Сұрақ қосу</button>
+    </form>
+    {% else %}
+    <p>Алдымен тест қосыңыз.</p>
+    {% endif %}
+</div>
+
+<h3 class="section-title">4. Барлық студенттердің нәтижелері</h3>
+{% if results %}
+<div class="filter-bar" data-target="allResults">
+    <input type="text" class="f-search" placeholder="Іздеу: студент, тест, баға, күні, балл...">
+    <label>Күннен <input type="date" class="f-from"></label>
+    <label>Күнге дейін <input type="date" class="f-to"></label>
+    <label>Пайыз ≥ <input type="number" class="f-min" min="0" max="100" placeholder="0"></label>
+    <label>Пайыз ≤ <input type="number" class="f-max" min="0" max="100" placeholder="100"></label>
+    <button type="button" class="f-reset">Тазалау</button>
+    <span class="f-count"></span>
+</div>
+{% endif %}
+
+<div class="card table-card" id="allResults">
+    {% if results %}
+    <table>
+        <tr>
+            <th>Студент</th><th>Тест</th><th>Балл</th><th>Пайыз</th><th>Баға</th><th>Күні</th>
+        </tr>
+        {% for r in results %}
+        <tr data-row data-date="{{ r.taken_at[:10] }}" data-percent="{{ r.percent }}">
+            <td>{{ r.full_name }}</td>
+            <td>{{ r.title }}</td>
+            <td>{{ r.score }} / {{ r.max_score }}</td>
+            <td>{{ r.percent }}%</td>
+            <td>{{ r.grade }}</td>
+            <td>{{ r.taken_at }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>Әзірге нәтижелер жоқ.</p>
+    {% endif %}
+</div>
+
+<h3 class="section-title">5. Қолданушылар</h3>
+<div class="filter-bar" data-target="usersTable">
+    <input type="text" class="f-search" placeholder="Іздеу: аты, email, рөлі (admin / student)...">
+    <button type="button" class="f-reset">Тазалау</button>
+    <span class="f-count"></span>
+</div>
+
+<div class="card table-card" id="usersTable">
+    <table>
+        <tr>
+            <th>Аты-жөні</th><th>Email</th><th>Рөлі</th><th>Тест саны</th><th></th>
+        </tr>
+        {% for u in users %}
+        <tr data-row>
+            <td>{{ u.full_name }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.role }}</td>
+            <td>{{ u.r_count }}</td>
+            <td>
+                {% if u.role != 'admin' %}
+                <form method="POST" action="{{ url_for('admin_delete_user', user_id=u.id) }}"
+                      onsubmit="return confirm('Студентті және оның нәтижелерін өшіресіз бе?')">
+                    <button class="btn-danger" type="submit">Өшіру</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<script src="{{ url_for('static', filename='filter.js') }}"></script>
+{% endblock %}

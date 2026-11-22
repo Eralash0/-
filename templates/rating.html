@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Рейтинг{% endblock %}
+
+{% block content %}
+<h2>🏆 Студенттер рейтингі</h2>
+<p class="muted">Орташа нәтиже бойынша есептеледі. Кемінде бір тест тапсырған студенттер ғана көрсетіледі.</p>
+
+{% if ranking %}
+
+    {% if my_place %}
+    <div class="card my-place">
+        Сіздің орныңыз: <b>#{{ my_place.place }}</b> · орташа нәтиже: <b>{{ my_place.avg }}%</b>
+    </div>
+    {% endif %}
+
+    <div class="podium">
+        {% for p in ranking[:3] %}
+        <div class="podium-item place-{{ p.place }}">
+            <div class="medal">{% if p.place == 1 %}🥇{% elif p.place == 2 %}🥈{% else %}🥉{% endif %}</div>
+            <div class="podium-name">{{ p.full_name }}</div>
+            <div class="podium-avg">{{ p.avg }}%</div>
+            <div class="podium-sub">{{ p.cnt }} тест</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="filter-bar" data-target="ratingTable">
+        <input type="text" class="f-search" placeholder="Студентті іздеу...">
+        <button type="button" class="f-reset">Тазалау</button>
+        <span class="f-count"></span>
+    </div>
+
+    <div class="card table-card" id="ratingTable">
+        <table>
+            <tr>
+                <th>Орын</th><th>Студент</th><th>Тест саны</th><th>Орташа</th><th>Ең жақсы</th>
+            </tr>
+            {% for p in ranking %}
+            <tr data-row class="{% if p.id == session.get('user_id') %}me{% endif %}">
+                <td><span class="place-pill">{{ p.place }}</span></td>
+                <td>{{ p.full_name }}</td>
+                <td>{{ p.cnt }}</td>
+                <td>{{ p.avg }}%</td>
+                <td>{{ p.best }}%</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+{% else %}
+    <div class="card"><p>Рейтинг әзірге бос. Бірінші болып тест тапсырыңыз!</p></div>
+{% endif %}
+
+<script src="{{ url_for('static', filename='filter.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,13 @@
+
+
+{% extends "base.html" %}
+{% block title %}Қате {{ code }}{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-code">{{ code }}</div>
+    <h2>{{ title }}</h2>
+    <p>{{ text }}</p>
+    <a class="btn" href="{{ url_for('index') }}">Басты бетке оралу</a>
+</div>
+{% endblock %}

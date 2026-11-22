@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Тіркелу{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <h2>Тіркелу</h2>
+    <form method="POST">
+        <label>Аты-жөні</label>
+        <input type="text" name="full_name" required>
+
+        <label>Email</label>
+        <input type="email" name="email" required>
+
+        <label>Құпиясөз</label>
+        <input type="password" name="password" required>
+
+        <label>Құпиясөзді қайталаңыз</label>
+        <input type="password" name="confirm" required>
+
+        <button class="btn" type="submit">Тіркелу</button>
+    </form>
+    <p class="hint">Аккаунтыңыз бар ма? <a href="{{ url_for('login') }}">Кіру</a></p>
+</div>
+{% endblock %}

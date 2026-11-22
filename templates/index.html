@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Басты бет{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="home-hero">
+    <span class="home-badge">Онлайн тестілеу платформасы</span>
+    <h1>Білімді тексеріңіз, <br>нәтижені бірден біліңіз</h1>
+    <p>Тестті онлайн тапсырыңыз, жауаптар автоматты түрде бағаланады,
+       барлық нәтиже сақталып, профильде көрінеді.</p>
+    <div class="home-cta">
+        {% if session.get('user_id') %}
+            <a class="btn-light" href="{{ url_for('tests') }}">Тесттерге өту</a>
+            <a class="btn-outline" href="{{ url_for('profile') }}">Профиль</a>
+        {% else %}
+            <a class="btn-light" href="{{ url_for('register') }}">Тіркелу</a>
+            <a class="btn-outline" href="{{ url_for('login') }}">Кіру</a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- МҮМКІНДІКТЕР -->
+<h2 class="home-title">Жүйе мүмкіндіктері</h2>
+<div class="home-features">
+    <div class="card feature">
+        <div class="f-icon">⚡</div>
+        <h3>Автоматты бағалау</h3>
+        <p>Тестті аяқтаған бойда балл, пайыз және баға есептеледі.</p>
+    </div>
+    <div class="card feature">
+        <div class="f-icon">⏱</div>
+        <h3>Уақыт таймері</h3>
+        <p>Әр тестке уақыт беріледі, уақыт біткенде жауаптар өзі жіберіледі.</p>
+    </div>
+    <div class="card feature">
+        <div class="f-icon">📊</div>
+        <h3>Нәтижелер тарихы</h3>
+        <p>Барлық тапсырған тестіңіз сақталады, іздеу және сүзгі арқылы табасыз.</p>
+    </div>
+    <div class="card feature">
+        <div class="f-icon">🔒</div>
+        <h3>Қауіпсіз жүйе</h3>
+        <p>Құпиясөздер шифрланып сақталады, админ-панель тек админге ашық.</p>
+    </div>
+</div>
+
+<!-- ҚАЛАЙ ЖҰМЫС ІСТЕЙДІ -->
+<h2 class="home-title">Қалай жұмыс істейді?</h2>
+<div class="home-steps">
+    <div class="step">
+        <div class="step-num">1</div>
+        <h3>Тіркеліңіз</h3>
+        <p>Аты-жөніңіз бен email арқылы аккаунт жасаңыз.</p>
+    </div>
+    <div class="step">
+        <div class="step-num">2</div>
+        <h3>Тест тапсырыңыз</h3>
+        <p>Тесттер тізімінен таңдап, сұрақтарға жауап беріңіз.</p>
+    </div>
+    <div class="step">
+        <div class="step-num">3</div>
+        <h3>Нәтижені көріңіз</h3>
+        <p>Балл мен бағаңызды бірден алып, профильде қадағалаңыз.</p>
+    </div>
+</div>
+{% include "_help.html" %}
+<!-- СОҢҒЫ ШАҚЫРУ -->
+<section class="home-final">
+    <h2>Бастауға дайынсыз ба?</h2>
+    {% if session.get('user_id') %}
+        <a class="btn-light" href="{{ url_for('tests') }}">Тестті бастау</a>
+    {% else %}
+        <a class="btn-light" href="{{ url_for('register') }}">Тегін тіркелу</a>
+    {% endif %}
+</section>
+
+{% endblock %}

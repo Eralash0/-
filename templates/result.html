@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Нәтиже{% endblock %}
+
+{% block content %}
+<div class="card result-card">
+    <h2>{{ r.title }}</h2>
+    {% if r.user_id != session.get('user_id') %}
+    <p class="muted">Студент: <b>{{ r.full_name }}</b></p>
+    {% endif %}
+    <div class="score-circle">{{ r.percent }}%</div>
+    <p class="score-line">Балл: <b>{{ r.score }} / {{ r.max_score }}</b></p>
+    <p class="score-line">Баға: <b>{{ grade }}</b></p>
+    <p class="hint">Тапсырған уақыты: {{ r.taken_at }}</p>
+    <a class="btn" href="{{ url_for('tests') }}">Тесттер тізіміне оралу</a>
+</div>
+
+{% if review %}
+<h3 class="section-title">Сұрақтар мен жауаптар</h3>
+
+<div class="chips">
+    <span class="chip ok">✔ Дұрыс: <b>{{ stats.correct }}</b></span>
+    <span class="chip bad">✘ Қате: <b>{{ stats.wrong }}</b></span>
+    <span class="chip skip">— Жауапсыз: <b>{{ stats.skipped }}</b></span>
+</div>
+
+{% for a in review %}
+<div class="card review-card {{ a.status }}">
+    <div class="review-head">
+        <b>{{ a.position }}. {{ a.text }}</b>
+        {% if a.status == 'correct' %}<span class="tag ok">Дұрыс</span>
+        {% elif a.status == 'wrong' %}<span class="tag bad">Қате</span>
+        {% else %}<span class="tag skip">Жауап берілмеген</span>{% endif %}
+    </div>
+
+    {% for letter, text in a.options %}
+    <div class="opt-line {% if letter == a.correct %}opt-correct{% elif letter == a.chosen %}opt-wrong{% endif %}">
+        <span class="opt-letter">{{ letter }}</span>
+        <span class="opt-text">{{ text }}</span>
+        {% if letter == a.correct and letter == a.chosen %}<span class="opt-mark">✔ Сіздің жауабыңыз</span>
+        {% elif letter == a.correct %}<span class="opt-mark">✔ Дұрыс жауап</span>
+        {% elif letter == a.chosen %}<span class="opt-mark">✘ Сіздің жауабыңыз</span>{% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+
+{% else %}
+<div class="card review-note">
+    Бұл нәтиже сұрақтарды талдау қосылғанға дейін тапсырылған, сондықтан сұрақтар мен жауаптардың толық тізімі сақталмаған.
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Тесттер{% endblock %}
+
+{% block content %}
+<h2>Қолжетімді тесттер</h2>
+
+{% if tests %}
+<div class="filter-bar" data-target="testsGrid">
+    <input type="text" class="f-search" placeholder="Тест атауын іздеу...">
+    <button type="button" class="f-reset">Тазалау</button>
+    <span class="f-count"></span>
+</div>
+
+<div class="grid" id="testsGrid">
+    {% for t in tests %}
+    <div class="card test-card" data-row>
+        <h3>{{ t.title }}</h3>
+        <p class="desc">{{ t.description }}</p>
+        <ul class="meta">
+            <li>Сұрақ саны: <b>{{ t.q_count }}</b></li>
+            <li>Максималды балл: <b>{{ t.max_score }}</b></li>
+            <li>Уақыты: <b>{{ t.duration_minutes }} мин</b></li>
+            {% if t.author %}<li>Автор: <b>{{ t.author }}</b></li>{% endif %}
+        </ul>
+        <a class="btn" href="{{ url_for('take_test', test_id=t.id) }}">Тестті бастау</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>Әзірге тесттер жоқ.</p>
+{% endif %}
+
+<h2 class="section-title">Менің нәтижелерім</h2>
+{% if my_results %}
+<div class="filter-bar" data-target="myResults">
+    <input type="text" class="f-search" placeholder="Іздеу: тест, күні, балл...">
+    <label>Күннен <input type="date" class="f-from"></label>
+    <label>Күнге дейін <input type="date" class="f-to"></label>
+    <label>Пайыз ≥ <input type="number" class="f-min" min="0" max="100" placeholder="0"></label>
+    <label>Пайыз ≤ <input type="number" class="f-max" min="0" max="100" placeholder="100"></label>
+    <button type="button" class="f-reset">Тазалау</button>
+    <span class="f-count"></span>
+</div>
+
+<div class="card table-card" id="myResults">
+    <table>
+        <tr>
+            <th>Тест</th>
+            <th>Балл</th>
+            <th>Пайыз</th>
+            <th>Күні</th>
+            <th></th>
+        </tr>
+        {% for r in my_results %}
+        <tr data-row data-date="{{ r.taken_at[:10] }}" data-percent="{{ r.percent }}">
+            <td>{{ r.title }}</td>
+            <td>{{ r.score }} / {{ r.max_score }}</td>
+            <td>{{ r.percent }}%</td>
+            <td>{{ r.taken_at }}</td>
+            <td><a href="{{ url_for('result', result_id=r.id) }}">Ашу</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% else %}
+<p>Сіз әлі ешқандай тест тапсырған жоқсыз.</p>
+{% endif %}
+
+<script src="{{ url_for('static', filename='filter.js') }}"></script>
+{% endblock %}
